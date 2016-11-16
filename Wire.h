@@ -1,10 +1,10 @@
 // make this implement the Wire.h functionalities, but with mraa in c++
-#include <mraa.h>
-
 #ifndef TwoWire_h
 #define TwoWire_h
 
 #define BUFFER_LENGTH 32
+
+#include <mraa.h>
 
 class TwoWire {
 	mraa::I2C *i2c;
@@ -12,7 +12,7 @@ class TwoWire {
 	int rxBufferIndex;
 	int rxBufferLength;
 public:
-	void begin();
+	void begin(void);
 	void beginTransmission(uint8_t);
 	void beginTransmission(int);
 	uint8_t endTransmission(uint8_t);

@@ -2,7 +2,7 @@
 
 TwoWire::TwoWire(){}
 
-TwoWire::begin(void) {
+void TwoWire::begin(void) {
 	// possibly make the bus 1
 	i2c = new mraa::I2c(0);
 }
@@ -21,7 +21,7 @@ void TwoWire::beginTransmission(int address) {
 
 uint8_t TwoWire::endTransmission(uint8_t sendStop) {}
 
-uint8_t TwoWrie::endTransmission(void) {
+uint8_t TwoWire::endTransmission(void) {
 	return endTransmission(true);
 }
 
