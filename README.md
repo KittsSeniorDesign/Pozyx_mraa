@@ -1,5 +1,5 @@
-# Pozyx-Arduino-library
-The Arduino library for use with the pozyx shield.
+# Pozyx_mraa
+The Arduino library for use with the pozyx shield, but it also works on the Intel Edison because of the Wire.h provided here. **Notice it is not the same Wire.h that Ardunio uses, and requires mraa to be installed**
 
 The library requires **firmware version 1.0** installed on the Pozyx devices.
 
