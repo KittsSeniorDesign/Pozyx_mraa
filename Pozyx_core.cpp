@@ -7,6 +7,7 @@
 
 #include "Pozyx.h"
 #include <Wire.h>
+#include <unistd.h>
 
 extern "C" {
   #include "Pozyx_definitions.h"
@@ -34,9 +35,9 @@ boolean PozyxClass::waitForFlag(uint8_t interrupt_flag, int timeout_ms, uint8_t 
   // stay in this loop until the event interrupt flag is set or until the the timer runs out
   while(millis()-timer < timeout_ms)
   {
-    // in polling mode, we insert a small delay such that we don't swamp the i2c bus
+    // in polling mode, we insert a small usleep such that we don't swamp the i2c bus
     if( _mode == MODE_POLLING ){
-      delay(1);
+      usleep(1);
     }
     
     if( (_interrupt == 1) || (_mode == MODE_POLLING))
@@ -90,7 +91,7 @@ int PozyxClass::begin(boolean print_result, int mode, int interrupts, int interr
   Wire.begin();
   
   // wait a bit until the pozyx board is up and running
-  delay(250);
+  usleep(250);
   
   _mode = mode;
   
@@ -174,7 +175,7 @@ int PozyxClass::begin(boolean print_result, int mode, int interrupts, int interr
   }   
   
   // all done
-  delay(POZYX_DELAY_LOCAL_WRITE);
+  usleep(POZYX_DELAY_LOCAL_WRITE);
   return status;
 }
 
@@ -523,7 +524,7 @@ int PozyxClass::sendTXBufferData(uint16_t destination)
   params[1] = (uint8_t)(destination>>8);
   params[2] = 0x06;    
   status = regFunction(POZYX_TX_SEND, (uint8_t *)&params, 3, NULL, 0);
-  delay(POZYX_DELAY_LOCAL_FUNCTION);
+  usleep(POZYX_DELAY_LOCAL_FUNCTION);
 
   return status;
 }

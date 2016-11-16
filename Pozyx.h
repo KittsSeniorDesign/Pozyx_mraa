@@ -16,12 +16,6 @@
 
 #include <inttypes.h>           
 
-#if (ARDUINO >= 100)
- #include "Arduino.h"
-#else
- #include "WProgram.h"
-#endif
-
 ///////////////////////////////////////////////// ASSERTIONS /////////////////////////////////////
 // assertions will check for wrong use of the library.
 
