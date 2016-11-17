@@ -6,7 +6,8 @@
 */
 
 #include "Pozyx.h"
-#include <Wire.h>
+#include "Wire.h"
+#include <string>
 #include <unistd.h>
 
 extern "C" {
@@ -940,7 +941,7 @@ void PozyxClass::resetSystem(uint16_t remote_id)
 }
 
 
-String PozyxClass::getSystemError(uint16_t remote_id)
+string PozyxClass::getSystemError(uint16_t remote_id)
 {
   uint8_t error_code, result;
 
@@ -994,7 +995,7 @@ String PozyxClass::getSystemError(uint16_t remote_id)
 
 }
 
-int PozyxClass::setLed(int led_num, boolean state, uint16_t remote_id)
+int PozyxClass::setLed(int led_num, bool state, uint16_t remote_id)
 {
   assert(led_num >= 1);
   assert(led_num <= 4);

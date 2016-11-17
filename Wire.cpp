@@ -1,7 +1,5 @@
 #include "Wire.h"
 
-TwoWire::TwoWire(){}
-
 void TwoWire::begin(void) {
 	// possibly make the bus 1
 	i2c = new mraa::I2c(0);
@@ -9,7 +7,7 @@ void TwoWire::begin(void) {
 
 void TwoWire::beginTransmission(uint8_t address) {
 	i2c->address(address);
-	i2c->frequency(I2C_STD);
+	//i2c->frequency(mraa::I2C_STD);
 	rxBuffer = (uint8_t *)malloc(sizeof(uint8_t)*BUFFER_LENGTH);
 	rxBufferIndex = 0;
 	rxBufferLength = 0;

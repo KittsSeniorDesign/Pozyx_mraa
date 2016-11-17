@@ -4,10 +4,10 @@
 
 #define BUFFER_LENGTH 32
 
-#include <mraa.h>
+#include "mraa/i2c.hpp"
 
 class TwoWire {
-	mraa::I2C *i2c;
+	mraa::I2c *i2c;
 	uint8_t *rxBuffer;
 	int rxBufferIndex;
 	int rxBufferLength;

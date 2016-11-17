@@ -10,6 +10,7 @@
     - and what is the expected output
 *
 */
+#include <string>
 
 #ifndef POZYX_h
 #define POZYX_h
@@ -290,7 +291,7 @@ protected:
 
 public:
 
-    static boolean waitForFlag_safe(uint8_t interrupt_flag, int timeout_ms, uint8_t *interrupt = NULL);   
+    static bool waitForFlag_safe(uint8_t interrupt_flag, int timeout_ms, uint8_t *interrupt = NULL);   
 
     /** \addtogroup core 
      *  @{
@@ -310,7 +311,7 @@ public:
     * @retval #true event occured.
     * @retval #false event did not occur, this function timed out.
     */
-    static boolean waitForFlag(uint8_t interrupt_flag, int timeout_ms, uint8_t *interrupt = NULL);     
+    static bool waitForFlag(uint8_t interrupt_flag, int timeout_ms, uint8_t *interrupt = NULL);     
 
     /**
     * Initiates the Pozyx shield. This function initializes the pozyx device. 
@@ -326,7 +327,7 @@ public:
     * @retval #POZYX_SUCCESS success.
     * @retval #POZYX_FAILURE function failed.
     */
-    static int begin(boolean print_result = false, int mode = MODE_INTERRUPT,  int interrupts = POZYX_INT_MASK_ALL, int interrupt_pin = POZYX_INT_PIN0);
+    static int begin(bool print_result = false, int mode = MODE_INTERRUPT,  int interrupts = POZYX_INT_MASK_ALL, int interrupt_pin = POZYX_INT_PIN0);
    
     /**
     * Read from the registers of the connected Pozyx shield.
@@ -772,7 +773,7 @@ public:
     *
     * @see setLedConfig
     */
-    static int setLed(int led_num, boolean state, uint16_t remote_id = NULL);
+    static int setLed(int led_num, bool state, uint16_t remote_id = NULL);
 
     /**
     * Function to obtain the interrupt configuration.
@@ -1198,10 +1199,10 @@ public:
     *
     *   @param remote_id optional parameter that determines the remote device to be used
     *
-    * @retval String the textual error
+    * @retval string the textual error
     *
     */
-    static String getSystemError(uint16_t remote_id = NULL);
+    static string getSystemError(uint16_t remote_id = NULL);
 
 
 /** @}*/

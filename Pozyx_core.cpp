@@ -6,11 +6,17 @@
 */
 
 #include "Pozyx.h"
-#include <Wire.h>
+#include "Wire.h"
 #include <unistd.h>
+#include <iostream>
+#include <ctime>
 
 extern "C" {
   #include "Pozyx_definitions.h"
+}
+
+long millis() {
+	return (((float)clock())/CLOCKS_PER_SEC)*1000;
 }
 
 int PozyxClass::_interrupt;
@@ -27,7 +33,7 @@ void PozyxClass::IRQ()
   _interrupt = 1;  
 }
 
-boolean PozyxClass::waitForFlag(uint8_t interrupt_flag, int timeout_ms, uint8_t *interrupt)
+bool PozyxClass::waitForFlag(uint8_t interrupt_flag, int timeout_ms, uint8_t *interrupt)
 {
   long timer = millis();
   int status;
@@ -62,22 +68,22 @@ boolean PozyxClass::waitForFlag(uint8_t interrupt_flag, int timeout_ms, uint8_t 
   return false;  
 }
 
-boolean PozyxClass::waitForFlag_safe(uint8_t interrupt_flag, int timeout_ms, uint8_t *interrupt)
+bool PozyxClass::waitForFlag_safe(uint8_t interrupt_flag, int timeout_ms, uint8_t *interrupt)
 {
   int tmp = _mode;
   _mode = MODE_POLLING;
-  boolean result = waitForFlag(interrupt_flag, timeout_ms, interrupt);
+  bool result = waitForFlag(interrupt_flag, timeout_ms, interrupt);
   _mode = tmp;
   return result;
 }
 
-int PozyxClass::begin(boolean print_result, int mode, int interrupts, int interrupt_pin){
+int PozyxClass::begin(bool print_result, int mode, int interrupts, int interrupt_pin){
   
   int status = POZYX_SUCCESS;
 
   if(print_result){
-    Serial.println("Pozyx Shield");
-    Serial.println("------------");
+    std::cout << "Pozyx Shield" << std::endl;
+    std::cout <<"------------" << std::endl;
   }
 
   // check if the mode parameter is valid
@@ -108,16 +114,11 @@ int PozyxClass::begin(boolean print_result, int mode, int interrupts, int interr
   _hw_version = regs[2]; 
 
   if(print_result){
-    Serial.print("WhoAmI: 0x");
-    Serial.println(whoami, HEX);
-    Serial.print("FW ver.: v");
-    Serial.print((_fw_version&0xF0)>>4);
-    Serial.print(".");
-    Serial.print((_fw_version&0x0F));
+    std::cout << "WhoAmI: 0x" << std::hex << whoami << std::endl;
+    std::cout << "FW ver.: v" << ((_fw_version&0xF0)>>4) << "." << (_fw_version&0x0F) << std::endl;
     if(_fw_version < 0x10)
-      Serial.print(" (please upgrade)");
-    Serial.print("\nHW ver.: ");
-    Serial.println(_hw_version);  
+      std::cout << " (please upgrade)";
+    std::cout << "\nHW ver.: " << _hw_version << std::endl;  
   }
   // verify if the whoami is correct
   if(whoami != 0x43) {    
@@ -131,8 +132,8 @@ int PozyxClass::begin(boolean print_result, int mode, int interrupts, int interr
   } 
 
   if(print_result){
-    Serial.print("selftest: 0b");
-    Serial.println(selftest, BIN);
+    std::cout << "selftest: 0b";
+    std::cout << std::bitset<8> a(selftest) << std::endl;
   }
 
   if((_hw_version & POZYX_TYPE) == POZYX_TAG)
@@ -161,7 +162,7 @@ int PozyxClass::begin(boolean print_result, int mode, int interrupts, int interr
     // Arduino UNO, Mega
     attachInterrupt(interrupt_pin, IRQ, RISING);
 #else
-    Serial.println("This is not a board supported by Pozyx, interrupts may not work");
+    std::cout << "This is not a board supported by Pozyx, interrupts may not work" std::endl;
     attachInterrupt(interrupt_pin, IRQ, RISING);
 #endif
 
