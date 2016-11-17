@@ -1,8 +1,8 @@
 #include "Wire.h"
 
 void Wire::begin(void) {
-	// possibly make the bus 1
-	i2c = new mraa::I2c(0);
+	// bus 6 because thats what it said on http://iotdk.intel.com/docs/master/mraa/edison.html in November 2016 when this file was written
+	i2c = new mraa::I2c(6);
 }
 
 void Wire::beginTransmission(uint8_t address) {
