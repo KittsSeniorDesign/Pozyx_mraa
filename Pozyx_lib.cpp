@@ -7,8 +7,10 @@
 
 #include "Pozyx.h"
 #include "Wire.h"
-#include <string>
+#include <cstring>
+#include <string.h>
 #include <unistd.h>
+#include <iostream>
 
 extern "C" {
   #include "Pozyx_definitions.h"
@@ -941,7 +943,7 @@ void PozyxClass::resetSystem(uint16_t remote_id)
 }
 
 
-string PozyxClass::getSystemError(uint16_t remote_id)
+std::string PozyxClass::getSystemError(uint16_t remote_id)
 {
   uint8_t error_code, result;
 
@@ -953,44 +955,44 @@ string PozyxClass::getSystemError(uint16_t remote_id)
   }
 
   if(result != POZYX_SUCCESS)
-    return F("Error: could not connect with the Pozyx device");
+    return "Error: could not connect with the Pozyx device";
 
   switch(error_code)
   {
     case POZYX_ERROR_NONE:
-      return F("");
+      return "";
     case POZYX_ERROR_I2C_WRITE:
-      return F("Error 0x01: Error writing to a register through the I2C bus");
+      return "Error 0x01: Error writing to a register through the I2C bus";
     case POZYX_ERROR_I2C_CMDFULL:
-      return F("Error 0x02: Pozyx cannot handle all the I2C commands at once");
+      return "Error 0x02: Pozyx cannot handle all the I2C commands at once";
     case POZYX_ERROR_ANCHOR_ADD:
-      return F("Error 0x03: Cannot add anchor to the internal device list");
+      return "Error 0x03: Cannot add anchor to the internal device list";
     case POZYX_ERROR_COMM_QUEUE_FULL:
-      return F("Error 0x04: Communication queue is full, too many UWB messages");
+      return "Error 0x04: Communication queue is full, too many UWB messages";
     case POZYX_ERROR_I2C_READ:
-      return F("Error 0x05: Error reading from a register from the I2C bus");
+      return "Error 0x05: Error reading from a register from the I2C bus";
     case POZYX_ERROR_UWB_CONFIG:
-      return F("Error 0x06: Cannot change the UWB configuration");
+      return "Error 0x06: Cannot change the UWB configuration";
     case POZYX_ERROR_OPERATION_QUEUE_FULL:
-      return F("Error 0x07: Pozyx cannot handle all the operations at once");
+      return "Error 0x07: Pozyx cannot handle all the operations at once";
     case POZYX_ERROR_STARTUP_BUSFAULT:
-      return F("Error 0x08: Internal bus error");
+      return "Error 0x08: Internal bus error";
     case POZYX_ERROR_FLASH_INVALID:
-      return F("Error 0x09: Flash memory is corrupted or invalid");
+      return "Error 0x09: Flash memory is corrupted or invalid";
     case POZYX_ERROR_NOT_ENOUGH_ANCHORS:
-      return F("Error 0x0A: Not enough anchors available for positioning");
+      return "Error 0x0A: Not enough anchors available for positioning";
     case POZYX_ERROR_DISCOVERY:
-      return F("Error 0x0B: Error during the Discovery process");
+      return "Error 0x0B: Error during the Discovery process";
     case POZYX_ERROR_CALIBRATION:
-      return F("Error 0x0C: Error during the auto calibration process");
+      return "Error 0x0C: Error during the auto calibration process";
     case POZYX_ERROR_FUNC_PARAM:
-      return F("Error 0x0D: Invalid function parameters for the register function");
+      return "Error 0x0D: Invalid function parameters for the register function";
     case POZYX_ERROR_ANCHOR_NOT_FOUND:
-      return F("Error 0x0E: The coordinates of an anchor are not found");
+      return "Error 0x0E: The coordinates of an anchor are not found";
     case POZYX_ERROR_GENERAL:
-      return F("Error 0xFF: General error");
+      return "Error 0xFF: General error";
     default:
-      return F("Unknown error");
+      return "Unknown error";
   }
 
 }
@@ -1017,7 +1019,7 @@ int PozyxClass::doRanging(uint16_t destination, device_range_t *range)
 {
   assert(destination != 0);
   assert(range != NULL);
-  memset((uint8_t*)range, 0, sizeof(device_range_t));
+  std::memset((uint8_t*)range, 0, sizeof(device_range_t));
   
   // trigger the ranging
   uint8_t int_status = 0;
@@ -1399,7 +1401,7 @@ int PozyxClass::doAnchorCalibration(int dimension, int num_measurements, int num
   params[0] = (uint8_t)dimension;
   params[1] = (uint8_t)num_measurements;
   if (num_anchors > 0){
-    memcpy(params+2, (uint8_t*)anchors, num_anchors * sizeof(uint16_t));
+    std::memcpy(params+2, (uint8_t*)anchors, num_anchors * sizeof(uint16_t));
   }
 
   uint8_t int_status = 0;
@@ -1518,7 +1520,7 @@ int PozyxClass::saveConfiguration(int type, uint8_t registers[], int num_registe
   int num_params = 1 + num_registers;
   uint8_t params[num_params];
   params[0] = type;
-  memcpy(params+1, registers, num_registers);
+  std::memcpy(params+1, registers, num_registers);
 
   if(remote_id == NULL){
     // trigger the register function to save
@@ -1595,7 +1597,7 @@ int PozyxClass::getNumRegistersSaved(uint16_t remote_id)
   int status;
 
   uint8_t details[20];
-  memset(details, 0, 20);
+  std::memset(details, 0, 20);
 
   if(remote_id == NULL){
     status = regFunction(POZYX_FLASH_DETAILS, NULL, 0, details, 20); 
@@ -1642,38 +1644,22 @@ bool PozyxClass::isRegisterSaved(uint8_t regAddress, uint16_t remote_id)
 void __attribute__((weak)) __assert (const char *func, const char *file, int line, const char *failedexpr)
 {
     // print out whatever you like here, function name, filename, line#, expression that failed.
-  if (Serial){
-    Serial.print("Assertion in function : ");
-    Serial.println(func);
-    Serial.print("Assertion failed : ");
-    Serial.println(failedexpr);
-    Serial.print("Filename: ");
-    Serial.println(file);
-    Serial.print("Line number: ");
-    Serial.println(line);
+  std::cout <<  "Assertion in function : " << func << std::endl;
+  std::cout <<  "Assertion failed : " << failedexpr << std::endl;
+  std::cout << "Filename: " << file << std::endl;
+  std::cout << "Line number: " << line << std::endl;
 
-    // platform independent usleep to allow the string to be printed
-    usleep(10);
-  }
 
-    // halt after outputting information
-    abort(); 
+  // halt after outputting information
+  abort(); 
 }
 #else
 void __attribute__((weak)) __assert_pozyx (const char *__func, const char *__file, int __lineno)
 {
     // print out whatever you like here, function name, filename, line#, expression that failed.
-  if (Serial){
-    Serial.print("Assertion failed in function : ");
-    Serial.println(__func);
-    Serial.print("Filename: ");
-    Serial.println(__file);
-    Serial.print("Line number: ");
-    Serial.println(__lineno); 
-
-    // platform independent usleep to allow the string to be printed
-    usleep(10);
-  }
+  std::cout << "Assertion failed in function : " << __func << std::endl;
+  std::cout << "Filename: " << __file << std::endl;
+  std::cout << "Line number: " << __lineno << std::endl; 
 
   // halt after outputting information
   abort(); 

@@ -6,10 +6,13 @@
 */
 
 #include "Pozyx.h"
-#include "Wire.h"
 #include <unistd.h>
 #include <iostream>
+#include <cmath>
 #include <ctime>
+#include <bitset>
+#include <cstring>
+#include <mraa.hpp>
 
 extern "C" {
   #include "Pozyx_definitions.h"
@@ -19,6 +22,7 @@ long millis() {
 	return (((float)clock())/CLOCKS_PER_SEC)*1000;
 }
 
+Wire PozyxClass::wire;
 int PozyxClass::_interrupt;
 int PozyxClass::_mode;
 
@@ -28,7 +32,7 @@ int PozyxClass::_fw_version;       // pozyx firmware version. (By updating the f
 /**
  * The interrupt handler for the pozyx device: keeping it uber short!
  */
-void PozyxClass::IRQ()
+void PozyxClass::IRQ(void * args)
 {  
   _interrupt = 1;  
 }
@@ -78,6 +82,7 @@ bool PozyxClass::waitForFlag_safe(uint8_t interrupt_flag, int timeout_ms, uint8_
 }
 
 int PozyxClass::begin(bool print_result, int mode, int interrupts, int interrupt_pin){
+
   
   int status = POZYX_SUCCESS;
 
@@ -94,7 +99,7 @@ int PozyxClass::begin(bool print_result, int mode, int interrupts, int interrupt
   if((interrupt_pin != 0) && (interrupt_pin != 1)) 
     return POZYX_FAILURE;
 
-  Wire.begin();
+  wire.begin();
   
   // wait a bit until the pozyx board is up and running
   usleep(250);
@@ -133,7 +138,7 @@ int PozyxClass::begin(bool print_result, int mode, int interrupts, int interrupt
 
   if(print_result){
     std::cout << "selftest: 0b";
-    std::cout << std::bitset<8> a(selftest) << std::endl;
+    std::cout << std::bitset<8>(selftest) << std::endl;
   }
 
   if((_hw_version & POZYX_TYPE) == POZYX_TAG)
@@ -154,17 +159,9 @@ int PozyxClass::begin(bool print_result, int mode, int interrupts, int interrupt
   if(_mode == MODE_INTERRUPT){
     // set the function that must be called upon an interrupt
     // put your main code here, to run repeatedly:
-#if defined(__SAMD21G18A__) || defined(__ATSAMD21G18A__)
-    // Arduino Tian
-    int tian_interrupt_pin = interrupt_pin;
-    attachInterrupt(interrupt_pin+2, IRQ, RISING);
-#elif defined(__AVR_ATmega328P__) || defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-    // Arduino UNO, Mega
-    attachInterrupt(interrupt_pin, IRQ, RISING);
-#else
-    std::cout << "This is not a board supported by Pozyx, interrupts may not work" std::endl;
-    attachInterrupt(interrupt_pin, IRQ, RISING);
-#endif
+    mraa::Gpio interrupt_gpio = new mraa::Gpio(interrupt_pin);
+    std::cout << "This is not a board supported by Pozyx, interrupts may not work\n";
+    interrupt_gpio.isr(mraa::EDGE_RISING, *IRQ, NULL);
 
     // use interrupt as provided and initiate the interrupt mask
     uint8_t int_mask = interrupts;
@@ -191,7 +188,7 @@ int PozyxClass::regRead(uint8_t reg_address, uint8_t *pData, int size)
   if(!IS_REG_READABLE(reg_address))
     return POZYX_FAILURE;
   
-  int n_runs = ceil((float)size / BUFFER_LENGTH);
+  int n_runs = std::ceil((float)size / BUFFER_LENGTH);
   int i;
   int status = 1;
   uint8_t reg;
@@ -222,7 +219,7 @@ int PozyxClass::regWrite(uint8_t reg_address, const uint8_t *pData, int size)
   if(!IS_REG_WRITABLE(reg_address))
     return POZYX_FAILURE;
   
-  int n_runs = ceil((float)size / BUFFER_LENGTH);
+  int n_runs = std::ceil((float)size / BUFFER_LENGTH);
   int i;
   int status = 1;
     
@@ -252,10 +249,10 @@ int PozyxClass::regFunction(uint8_t reg_address, uint8_t *params, int param_size
 
   uint8_t status;
   
-  // this feels a bit clumsy with all these memcpy's
+  // this feels a bit clumsy with all these std::memcpy's
   uint8_t write_data[param_size+1];
   write_data[0] = reg_address;
-  memcpy(write_data+1, params, param_size);
+  std::memcpy(write_data+1, params, param_size);
   uint8_t read_data[size+1];
   
   // first write some data with i2c and then read some data
@@ -263,7 +260,7 @@ int PozyxClass::regFunction(uint8_t reg_address, uint8_t *params, int param_size
   if(status == POZYX_FAILURE)
     return status;    
   
-  memcpy(pData, read_data+1, size);
+  std::memcpy(pData, read_data+1, size);
 
   
   // the first byte that a function returns is always it's success indicator, so we simply pass this through
@@ -272,7 +269,7 @@ int PozyxClass::regFunction(uint8_t reg_address, uint8_t *params, int param_size
 
 
 /**
- * Wirelessly write a number of bytes to a specified register address on a remote Pozyx device using UWB.
+ * wirelessly write a number of bytes to a specified register address on a remote Pozyx device using UWB.
  */
 int PozyxClass::remoteRegWrite(uint16_t destination, uint8_t reg_address, uint8_t *pData, int size)
 {
@@ -286,7 +283,7 @@ int PozyxClass::remoteRegWrite(uint16_t destination, uint8_t reg_address, uint8_
   uint8_t tmp_data[size+1];
   tmp_data[0] = 0;
   tmp_data[1] = reg_address;              // the first byte is the register address we want to start writing to.
-  memcpy(tmp_data+2, pData, size);         // the remaining bytes are the data bytes to be written starting at the register address.
+  std::memcpy(tmp_data+2, pData, size);         // the remaining bytes are the data bytes to be written starting at the register address.
   status = regFunction(POZYX_TX_DATA, (uint8_t *)&tmp_data, size+2, NULL, 0);
   
   // stop if POZYX_TX_DATA returned an error.
@@ -320,7 +317,7 @@ int PozyxClass::remoteRegWrite(uint16_t destination, uint8_t reg_address, uint8_
 }
 
 /**
- * Wirelessly read a number of bytes from a specified register address on a remote Pozyx device using UWB. 
+ * wirelessly read a number of bytes from a specified register address on a remote Pozyx device using UWB. 
  */
 int PozyxClass::remoteRegRead(uint16_t destination, uint8_t reg_address, uint8_t *pData, int size)
 {
@@ -387,7 +384,7 @@ int PozyxClass::remoteRegRead(uint16_t destination, uint8_t reg_address, uint8_t
 }
 
 /*
- * Wirelessly call a register function with given parameters on a remote Pozyx device using UWB, the data from the function is stored in pData
+ * wirelessly call a register function with given parameters on a remote Pozyx device using UWB, the data from the function is stored in pData
  */
 int PozyxClass::remoteRegFunction(uint16_t destination, uint8_t reg_address, uint8_t *params, int param_size, uint8_t *pData, int size)
 {
@@ -400,7 +397,7 @@ int PozyxClass::remoteRegFunction(uint16_t destination, uint8_t reg_address, uin
   uint8_t tmp_data[param_size+2];
   tmp_data[0] = 0;  
   tmp_data[1] = reg_address;                // the first byte is the function register address we want to call.
-  memcpy(tmp_data+2, params, param_size);   // the remaining bytes are the parameter bytes for the function.
+  std::memcpy(tmp_data+2, params, param_size);   // the remaining bytes are the parameter bytes for the function.
   status = regFunction(POZYX_TX_DATA, tmp_data, param_size+2, NULL, 0);
   
   // stop if POZYX_TX_DATA returned an error.
@@ -448,7 +445,7 @@ int PozyxClass::remoteRegFunction(uint16_t destination, uint8_t reg_address, uin
           return status;    
         }
     
-        memcpy(pData, return_data+1, size);
+        std::memcpy(pData, return_data+1, size);
           
         return return_data[0];
       }else{
@@ -470,7 +467,7 @@ int PozyxClass::writeTXBufferData(uint8_t data[], int size, int offset)
     
   int i, status = 1;  
   int max_bytes = BUFFER_LENGTH-2;
-  int n_runs = ceil((float)size / max_bytes);
+  int n_runs = std::ceil((float)size / max_bytes);
   uint8_t params[BUFFER_LENGTH];
 
   // read out the received data.    
@@ -478,10 +475,10 @@ int PozyxClass::writeTXBufferData(uint8_t data[], int size, int offset)
   {   
     params[0] = offset + i*max_bytes;      // the offset
     if(i+1 != n_runs){       
-      memcpy(params+1, data+i*max_bytes, max_bytes);
+      std::memcpy(params+1, data+i*max_bytes, max_bytes);
       status &= regFunction(POZYX_TX_DATA, params, max_bytes + 1, NULL, 0);    
     }else{
-      memcpy(params+1, data+i*max_bytes, size-i*max_bytes);        
+      std::memcpy(params+1, data+i*max_bytes, size-i*max_bytes);        
       status &= regFunction(POZYX_TX_DATA, params, size-i*max_bytes+1, NULL, 0);          
     }       
   }  
@@ -499,7 +496,7 @@ int PozyxClass::readRXBufferData(uint8_t* pData, int size)
   int i;
   uint8_t params[2];
   int max_bytes = BUFFER_LENGTH-1;
-  int n_runs = ceil((float)size / max_bytes);
+  int n_runs = std::ceil((float)size / max_bytes);
 
   // read out the received data.    
   for(i=0; i<n_runs; i++)
@@ -542,7 +539,7 @@ int PozyxClass::sendData(uint16_t destination, uint8_t *pData, int size)
 
   uint8_t tmp_data[size+1];
   tmp_data[0] = 0;                        // the first byte is the offset byte.
-  memcpy(tmp_data+1, pData, size);
+  std::memcpy(tmp_data+1, pData, size);
   
   // set the TX buffer
   status = regFunction(POZYX_TX_DATA, tmp_data, size+1, NULL, 0);  
@@ -568,22 +565,22 @@ int PozyxClass::i2cWriteWrite(const uint8_t reg_address, const uint8_t *pData, i
 {
   int n, error;
 
-  Wire.beginTransmission(POZYX_I2C_ADDRESS);
+  wire.beginTransmission(POZYX_I2C_ADDRESS);
   // write the starting register address
-  n = Wire.write(reg_address);        
+  n = wire.write(reg_address);        
   if (n != 1)
     return (POZYX_FAILURE);
     
-  error = Wire.endTransmission(false); // hold the bus for a repeated start
+  error = wire.endTransmission(false); // hold the bus for a repeated start
   if (error != 0)
     return (POZYX_FAILURE);  
 
-  Wire.beginTransmission(POZYX_I2C_ADDRESS);
-  n = Wire.write(pData, size);  // write data bytes
+  wire.beginTransmission(POZYX_I2C_ADDRESS);
+  n = wire.write(pData, size);  // write data bytes
   if (n != size)
     return (POZYX_FAILURE);
 
-  error = Wire.endTransmission(true); // release the I2C-bus
+  error = wire.endTransmission(true); // release the I2C-bus
   if (error != 0)
     return (POZYX_FAILURE);
 
@@ -597,29 +594,29 @@ int PozyxClass::i2cWriteRead(uint8_t* write_data, int write_len, uint8_t* read_d
 {
   int i, n;
 
-  Wire.beginTransmission(POZYX_I2C_ADDRESS);
+  wire.beginTransmission(POZYX_I2C_ADDRESS);
   for(i=0; i<write_len; i++){
-    n = Wire.write(*(write_data+i));  // write parameter bytes
+    n = wire.write(*(write_data+i));  // write parameter bytes
   }
 
   if (n != 1)
     return (POZYX_FAILURE);
   
-  n = Wire.endTransmission(false);    // hold the I2C-bus for a repeated start
+  n = wire.endTransmission(false);    // hold the I2C-bus for a repeated start
 
   if (n != 0)
     return (POZYX_FAILURE);
 
   // Third parameter is true: relase I2C-bus after data is read.
-  Wire.requestFrom(POZYX_I2C_ADDRESS, read_len, true);
+  wire.requestFrom(POZYX_I2C_ADDRESS, read_len, true);
   i = 0;
   
-  while(Wire.available())
+  while(wire.available())
   {
     if(i<read_len)
-      read_data[i++]=Wire.read();
+      read_data[i++]=wire.read();
     else  
-      Wire.read();
+      wire.read();
   }
 
   if ( i != read_len){

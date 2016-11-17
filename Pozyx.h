@@ -10,10 +10,13 @@
     - and what is the expected output
 *
 */
-#include <string>
 
 #ifndef POZYX_h
 #define POZYX_h
+
+#include <string>
+#include "Wire.h"
+
 
 #include <inttypes.h>           
 
@@ -220,6 +223,7 @@ typedef struct __attribute__((packed))_device_range {
     int16_t RSS;
 }device_range_t;
 
+
 /**
 * Pozyx CLASS
 * -----------
@@ -227,6 +231,7 @@ typedef struct __attribute__((packed))_device_range {
 class PozyxClass
 {
 protected:
+    static Wire wire;
     static int _mode;               // the mode of operation, can be MODE_INTERRUPT or MODE_POLLING
     static int _interrupt;          // variable to indicate that an interrupt has occured
 
@@ -273,7 +278,7 @@ protected:
     * ------------------
     * Internal function that sets the _interrupt variable on an Arduino interrupt
     */
-    static void IRQ(); 
+    static void IRQ(void *); 
 
     /**    
     * This function calls the waitForFlag function in polling mode. After this, the previous mode is reset.
@@ -1199,10 +1204,10 @@ public:
     *
     *   @param remote_id optional parameter that determines the remote device to be used
     *
-    * @retval string the textual error
+    * @retval std::string the textual error
     *
     */
-    static string getSystemError(uint16_t remote_id = NULL);
+    static std::string getSystemError(uint16_t remote_id = NULL);
 
 
 /** @}*/

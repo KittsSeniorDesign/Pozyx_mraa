@@ -1,12 +1,12 @@
 // make this implement the Wire.h functionalities, but with mraa in c++
-#ifndef TwoWire_h
-#define TwoWire_h
+#ifndef Wire_h
+#define Wire_h
 
 #define BUFFER_LENGTH 32
 
-#include "mraa/i2c.hpp"
+#include "mraa.hpp"
 
-class TwoWire {
+class Wire {
 	mraa::I2c *i2c;
 	uint8_t *rxBuffer;
 	int rxBufferIndex;
@@ -19,8 +19,8 @@ public:
 	uint8_t endTransmission(void);
 	size_t requestFrom(uint8_t, size_t, bool);
 	uint8_t requestFrom(uint8_t, uint8_t);
-    uint8_t requestFrom(uint8_t, uint8_t, uint8_t);
-    uint8_t requestFrom(int, int);
+	uint8_t requestFrom(uint8_t, uint8_t, uint8_t);
+	uint8_t requestFrom(int, int);
 	uint8_t requestFrom(int, int, int);
 
 	size_t write(uint8_t);
@@ -28,14 +28,10 @@ public:
 	int available(void);
 	int read(void);
 
-    inline size_t write(unsigned long n) { return write((uint8_t)n); }
-    inline size_t write(long n) { return write((uint8_t)n); }
-    inline size_t write(unsigned int n) { return write((uint8_t)n); }
+	inline size_t write(unsigned long n) { return write((uint8_t)n); }
+	inline size_t write(long n) { return write((uint8_t)n); }
+	inline size_t write(unsigned int n) { return write((uint8_t)n); }
 	inline size_t write(int n) { return write((uint8_t)n); }
 };
-
-#if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_TWOWIRE)
-extern TwoWire Wire;
-#endif
 
 #endif
