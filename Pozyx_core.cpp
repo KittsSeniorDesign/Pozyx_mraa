@@ -159,7 +159,7 @@ int PozyxClass::begin(bool print_result, int mode, int interrupts, int interrupt
   if(_mode == MODE_INTERRUPT){
     // set the function that must be called upon an interrupt
     // put your main code here, to run repeatedly:
-    mraa::Gpio interrupt_gpio = new mraa::Gpio(interrupt_pin);
+    mraa::Gpio interrupt_gpio(interrupt_pin);
     std::cout << "This is not a board supported by Pozyx, interrupts may not work\n";
     interrupt_gpio.isr(mraa::EDGE_RISING, *IRQ, NULL);
 

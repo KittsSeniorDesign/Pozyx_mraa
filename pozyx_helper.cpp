@@ -711,7 +711,7 @@ int saveConfiguration(int type, uint8_t registers[] = NULL, int num_registers = 
 * @see saveConfiguration
 */
 int clearConfiguration(uint16_t remote_id = NULL) {
-	return Pozyx.clearConfiguation(remote_id);
+	return Pozyx.clearConfiguration(remote_id);
 }
 
 /**
@@ -816,7 +816,7 @@ int getPositionError(pos_error_t *pos_error, uint16_t remote_id = NULL) {
 * @see setSelectionOfAnchors, getPositioningAnchorIds
 */
 int setPositioningAnchorIds(uint16_t anchors[], int anchor_num, uint16_t remote_id = NULL) {
-	return Pozyx.setPositionAnchorIds(anchors, anchor_num, remote_id);
+	return Pozyx.setPositioningAnchorIds(anchors, anchor_num, remote_id);
 }
 
 /**
@@ -835,7 +835,7 @@ int setPositioningAnchorIds(uint16_t anchors[], int anchor_num, uint16_t remote_
 * @see setSelectionOfAnchors, setPositioningAnchorIds
 */
 int getPositioningAnchorIds(uint16_t anchors[], int anchor_num, uint16_t remote_id = NULL) {
-	return Pozyx.getPositionAnchorIds(anchors, anchor_num, remote_id);
+	return Pozyx.getPositioningAnchorIds(anchors, anchor_num, remote_id);
 }
 
 /**

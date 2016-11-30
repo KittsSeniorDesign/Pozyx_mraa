@@ -213,7 +213,7 @@ class sensor_data_t(Structure):
 		('acceleration', acceleration_t),
 		('magnetic', magnetic_t),
 		('angular_vel', angular_vel_t),
-		('euler_angles' euler_angles_t),
+		('euler_angles', euler_angles_t),
 		('quaternion', quaternion_t),
 		('linear_acceleration', linear_acceleration_t),
 		('gravity_vector', gravity_vector_t),
@@ -411,7 +411,7 @@ def waitForFlag(interrupt_flag, timeout_ms, interrupt = None):
 * @retval #POZYX_FAILURE function failed.
 */
 '''
-def begin(print_result = False, mode = MODE_INTERRUPT, interrupts = POZYX_INT_MASK_ALL, interrupt_pin = POZYX_INT_PIN0)
+def begin(print_result = False, mode = MODE_INTERRUPT, interrupts = POZYX_INT_MASK_ALL, interrupt_pin = POZYX_INT_PIN0):
 	global _pozyx
 	return int(_pozyx.begin(c_bool(print_result), c_int(mode), c_int(interrupts), c_int(interrupt_pin)))
 
@@ -513,7 +513,7 @@ def regFunction(reg_address, params = None, size = 0):
 * @retval #POZYX_FAILURE function failed.
 */ 
 '''
-def remoteRegWrite(destination, reg_address, pData)
+def remoteRegWrite(destination, reg_address, pData):
 	global _pozyx 
 	size = len(pData)
 	ptr = (c_uint8 * size)(*pData)
@@ -1735,7 +1735,7 @@ def getAcceleration_mg(remote_id = -1):
 
 '''
 /**
-* Obtain the 3D magnetic field strength vector in µTesla.
+* Obtain the 3D magnetic field strength vector in = Tesla.
 * This function reads out the magnetic field strength data starting from the register reg:POZYX_MAGN_X. The maximal update rate is 100Hz.
 * The vector is expressed in body coordinates (i.e., along axes of the device).
 *
