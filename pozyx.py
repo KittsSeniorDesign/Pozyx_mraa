@@ -1,7 +1,7 @@
 #https://pgi-jcns.fz-juelich.de/portal/pages/using-c-from-python.html
 # to make so files https://docs.python.org/3/extending/building.html
 from ctypes import *
-import pozyx_definitions
+from pozyx_definitions import *
 
 '''
 /** 

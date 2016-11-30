@@ -62,14 +62,14 @@ void printCalibrationResult(){
   std::cout << "list size: " << status*list_size << std::endl;
   
   if(list_size == 0){
-    std::cout << "Calibration failed.\n" << Pozyx.getSystemError() << std::endl;
+    std::err << "Calibration failed.\n" << Pozyx.getSystemError() << std::endl;
     return;
   }
   
   uint16_t device_ids[list_size];
   status &= Pozyx.getDeviceIds(device_ids,list_size);
   
-  std::cout << "Calibration result:\n" << "Anchors found: " << list_size << std::endl;
+  std::cout << "Calibration result:\nAnchors found: " << list_size << std::endl;
   
   coordinates_t anchor_coor;
   for(int i=0; i<list_size; i++)
