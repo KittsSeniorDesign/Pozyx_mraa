@@ -1,4 +1,5 @@
 #include "Wire.h"
+#include <iostream>
 
 void Wire::begin(void) {
 	// bus 6 because thats what it said on http://iotdk.intel.com/docs/master/mraa/edison.html in November 2016 when this file was written
@@ -25,6 +26,7 @@ void Wire::beginTransmission(int address) {
 
 uint8_t Wire::endTransmission(uint8_t sendStop) {
 	int8_t ret = i2c->write(txBuffer, (int)txBufferLength);
+	std::cout << "ret=" << (int)ret << std::endl;
 	txBufferIndex = 0;
 	txBufferLength = 0;
 	transmitting = 0;

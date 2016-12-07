@@ -599,13 +599,11 @@ int PozyxClass::i2cWriteRead(uint8_t* write_data, int write_len, uint8_t* read_d
   for(i=0; i<write_len; i++){
     n = wire.write(*(write_data+i));  // write parameter bytes
   }
-  std::cout << n << std::endl;
   if (n != 1)
     return (POZYX_FAILURE);
   
   n = wire.endTransmission(false);    // hold the I2C-bus for a repeated start
-  std::cout << n << std::endl;
-
+  std::cout << "n=" << n << std::endl;
   if (n != 0)
     return (POZYX_FAILURE);
 
@@ -621,6 +619,7 @@ int PozyxClass::i2cWriteRead(uint8_t* write_data, int write_len, uint8_t* read_d
       wire.read();
   }
 
+  std::cout << i << " != " << read_len << std::endl;
   if ( i != read_len){
     return (POZYX_FAILURE);
   }

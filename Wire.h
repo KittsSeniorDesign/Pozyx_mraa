@@ -31,7 +31,7 @@ public:
 	size_t write(const uint8_t *, size_t);
 	int available(void);
 	int peek(void);
-	int flush(void);
+	void flush(void);
 	int read(void);
 
 	inline size_t write(unsigned long n) { return write((uint8_t)n); }
