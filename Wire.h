@@ -9,8 +9,12 @@
 class Wire {
 	mraa::I2c *i2c;
 	uint8_t *rxBuffer;
-	int rxBufferIndex;
-	int rxBufferLength;
+	uint8_t rxBufferIndex;
+	uint8_t rxBufferLength;
+	uint8_t *txBuffer;
+	uint8_t txBufferIndex;
+	uint8_t txBufferLength;
+	uint8_t transmitting;
 public:
 	void begin(void);
 	void beginTransmission(uint8_t);
@@ -26,6 +30,8 @@ public:
 	size_t write(uint8_t);
 	size_t write(const uint8_t *, size_t);
 	int available(void);
+	int peek(void);
+	int flush(void);
 	int read(void);
 
 	inline size_t write(unsigned long n) { return write((uint8_t)n); }
