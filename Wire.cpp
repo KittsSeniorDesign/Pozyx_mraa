@@ -6,8 +6,12 @@ void Wire::begin(void) {
 }
 
 void Wire::beginTransmission(uint8_t address) {
+	transmitting = 1;
 	i2c->address(address);
 	//i2c->frequency(mraa::I2C_STD);
+	txBuffer = (uint8_t *)malloc(sizeof(uint8_t)*BUFFER_LENGTH);
+	txBufferIndex = 0;
+	txBufferLength = 0;
 	rxBuffer = (uint8_t *)malloc(sizeof(uint8_t)*BUFFER_LENGTH);
 	rxBufferIndex = 0;
 	rxBufferLength = 0;
@@ -18,7 +22,11 @@ void Wire::beginTransmission(int address) {
 }
 
 uint8_t Wire::endTransmission(uint8_t sendStop) {
-	return 0;
+	int8_t ret = i2c->write(txBuffer, (int)txBufferLength);
+	txBufferIndex = 0;
+	txBufferLength = 0;
+	transmitting = 0;
+	return ret;
 }
 
 uint8_t Wire::endTransmission(void) {
@@ -52,11 +60,27 @@ uint8_t Wire::requestFrom(int address, int quantity, int sendStop){
 }
 
 size_t Wire::write(uint8_t data) {
-	i2c->writeByte(data);
+	if(transmitting) {
+		if(txBufferLength >= BUFFER_LENGTH){
+			return 0;
+		}
+		txBuffer[txBufferIndex] = data;
+		++txBufferIndex;
+		txBufferLength = txBufferIndex;
+	} else{
+	// i2c_slave_transmit(data, quantity);
+	}
+	return 1;
 }
 
 size_t Wire::write(const uint8_t *data, size_t quantity) {
-	i2c->write(data, (int) quantity);
+	if(transmitting){
+		for(size_t i = 0; i < quantity; ++i){
+			if(!write(data[i])) return i;
+		}
+	}else{
+	// i2c_slave_transmit(data, quantity);
+	}
 	return quantity;
 }
 
