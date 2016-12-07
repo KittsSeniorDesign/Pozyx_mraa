@@ -17,7 +17,9 @@ void Wire::beginTransmission(int address) {
 	beginTransmission((uint8_t)address);
 }
 
-uint8_t Wire::endTransmission(uint8_t sendStop) {}
+uint8_t Wire::endTransmission(uint8_t sendStop) {
+	return 0;
+}
 
 uint8_t Wire::endTransmission(void) {
 	return endTransmission(true);

@@ -185,8 +185,7 @@ int PozyxClass::regRead(uint8_t reg_address, uint8_t *pData, int size)
 {  
   // BUFFER_LENGTH is defined in wire.h, it limits the maximum amount of bytes that can be transmitted/received with i2c in one go
   // because of this, we may have to split up the i2c reads in smaller chunks
-   
-  if(!IS_REG_READABLE(reg_address))
+  if(!IS_REG_READABLE(reg_address)) 
     return POZYX_FAILURE;
   
   int n_runs = std::ceil((float)size / BUFFER_LENGTH);
@@ -205,6 +204,7 @@ int PozyxClass::regRead(uint8_t reg_address, uint8_t *pData, int size)
       status &= i2cWriteRead(&reg, 1, pData+offset, size-offset);
     }    
   }
+  std::cout << (int)status << std::endl;
   
   return status;
 }
@@ -599,11 +599,12 @@ int PozyxClass::i2cWriteRead(uint8_t* write_data, int write_len, uint8_t* read_d
   for(i=0; i<write_len; i++){
     n = wire.write(*(write_data+i));  // write parameter bytes
   }
-
+  std::cout << n << std::endl;
   if (n != 1)
     return (POZYX_FAILURE);
   
   n = wire.endTransmission(false);    // hold the I2C-bus for a repeated start
+  std::cout << n << std::endl;
 
   if (n != 0)
     return (POZYX_FAILURE);
