@@ -100,6 +100,7 @@ int PozyxClass::begin(bool print_result, int mode, int interrupts, int interrupt
     return POZYX_FAILURE;
 
   wire.begin();
+  std::cout << "wire was begun" << std::endl;
   
   // wait a bit until the pozyx board is up and running
   usleep(250);

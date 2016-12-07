@@ -2,6 +2,7 @@
 # to make so files https://docs.python.org/3/extending/building.html
 from ctypes import *
 from pozyx_definitions import *
+import os
 
 '''
 /** 
@@ -191,13 +192,13 @@ class sensor_raw_t(Structure):
 	_pack_ = 1
 	_fields_ = [
 		('pressure', c_uint32),
-		('acceleration' (c_int16 * 3)),
-		('magnetic' (c_int16 * 3)),
-		('angular_vel' (c_int16 * 3)),
-		('euler_angles' (c_int16 * 3)),
-		('quaternion' (c_int16 * 4)),
-		('linear_acceleration' (c_int16 * 3)),
-		('gravity_vector' (c_int16 * 3)),
+		('acceleration', (c_int16 * 3)),
+		('magnetic', (c_int16 * 3)),
+		('angular_vel', (c_int16 * 3)),
+		('euler_angles', (c_int16 * 3)),
+		('quaternion', (c_int16 * 4)),
+		('linear_acceleration', (c_int16 * 3)),
+		('gravity_vector', (c_int16 * 3)),
 		('temperature', c_uint8)
 	]
 
@@ -267,7 +268,7 @@ class device_range_t(Structure):
 		('RSS', c_int16)
 	]
 
-_pozyx = CDLL('pozyx_helper.so')
+_pozyx = CDLL(os.path.abspath('Pozyx.so'))
 _pozyx.waitForFlag_safe.argtypes = [c_uint8, c_int, POINTER(c_uint8)]
 _pozyx.waitForFlag_safe.restype = c_bool
 _pozyx.waitForFlag.argtypes = [c_uint8, c_int, POINTER(c_uint8)]
@@ -278,7 +279,7 @@ _pozyx.regFunction.argtypes = [c_uint8, POINTER(c_uint8)]
 _pozyx.remoteRegWrite.argtypes = [c_uint16, c_uint8, POINTER(c_uint8), c_int]
 _pozyx.remoteRegRead.argtypes = [c_uint16, c_uint8, POINTER(c_uint8), c_int]
 _pozyx.remoteRegFunction.argtypes = [c_uint16, c_uint8, POINTER(c_uint8), c_int, POINTER(c_uint8), c_int]
-_pozyx.sendData.argtypes.argtypes = [c_uint16, POINTER(c_uint8), c_int]
+_pozyx.sendData.argtypes = [c_uint16, POINTER(c_uint8), c_int]
 _pozyx.writeTXBufferData.argtypes = [POINTER(c_uint8), c_int, c_int]
 _pozyx.sendTXBufferData.argtypes = [c_uint16]
 _pozyx.readRXBufferData.argtypes = [POINTER(c_uint8), c_int]
@@ -292,7 +293,7 @@ _pozyx.setUWBChannel.argtypes = [c_int, c_uint16]
 _pozyx.getUWBChannel.argtypes = [POINTER(c_int), c_uint16]
 _pozyx.setTxPower.argtypes = [c_float, c_uint16]
 _pozyx.getTxPower.argtypes = [POINTER(c_float), c_uint16]
-_pozyx.getWhoAmI.argtypes = [POINTER(uint8_t), c_uint16]
+_pozyx.getWhoAmI.argtypes = [POINTER(c_uint8), c_uint16]
 _pozyx.getFirmwareVersion.argtypes = [POINTER(c_uint8), c_uint16]
 _pozyx.getHardwareVersion.argtypes = [POINTER(c_uint8), c_uint16]
 _pozyx.getSelftest.argtypes = [POINTER(c_uint8), c_uint16]
@@ -316,7 +317,7 @@ _pozyx.clearConfiguration.argtypes = [c_uint16]
 _pozyx.isRegisterSaved.argtypes = [c_uint8, c_uint16]
 _pozyx.isRegisterSaved.restype = c_bool
 _pozyx.getNumRegistersSaved.argtypes = [c_uint16]
-_pozyx.getCoordindates.argtypes = [POINTER(coordinates_t), c_uint16]
+_pozyx.getCoordinates.argtypes = [POINTER(coordinates_t), c_uint16]
 _pozyx.setCoordinates.argtypes = [coordinates_t, c_uint16]
 _pozyx.getPositionError.argtypes = [POINTER(pos_error_t), c_uint16]
 _pozyx.setPositioningAnchorIds.argtypes = [POINTER(c_uint16), c_int, c_uint16]
@@ -348,7 +349,7 @@ _pozyx.getTemperature_c.argtypes = [POINTER(c_float), c_uint16]
 _pozyx.doPositioning.argtypes = [POINTER(coordinates_t), c_uint8, c_int32, c_uint8]
 _pozyx.doRemotePositioning.argtypes = [c_uint16, POINTER(coordinates_t), c_uint8, c_int32, c_uint8]
 _pozyx.doRanging.argtypes = [c_uint16, POINTER(device_range_t)]
-_pozyx.doRemoteRanging,argtypes = [c_uint16, c_uint16, POINTER(device_range_t)]
+_pozyx.doRemoteRanging.argtypes = [c_uint16, c_uint16, POINTER(device_range_t)]
 _pozyx.getDeviceRangeInfo.argtypes = [c_uint16, POINTER(device_range_t), c_uint16]
 _pozyx.getDeviceListSize.argtypes = [POINTER(c_uint8), c_uint16]
 _pozyx.getDeviceIds.argtypes = [POINTER(c_uint16), c_int, c_uint16]

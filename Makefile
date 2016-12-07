@@ -5,9 +5,8 @@ TARGET = Pozyx
 
 SRCS = $(TARGET)_core.cpp $(TARGET)_lib.cpp Wire.cpp
 
-so_file: pozyx_helper.cpp
-	$(CC) $(CFLAGS) -c pozyx_helper.cpp $(SRCS)
-	$(CC) $(CFLAGS) -shared -o $(TARGET).so pozyx_helper.o $(SRCS)
+so: pozyx_helper.cpp
+	$(CC) $(CFLAGS) -shared -o $(TARGET).so pozyx_helper.cpp $(SRCS)
 
 ready_to_localize: ready_to_localize.cpp
 	$(CC) $(CFLAGS) -o ready_to_localize ready_to_localize.cpp $(SRCS)

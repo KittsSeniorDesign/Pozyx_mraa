@@ -62,7 +62,7 @@ void printCalibrationResult(){
   std::cout << "list size: " << status*list_size << std::endl;
   
   if(list_size == 0){
-    std::err << "Calibration failed.\n" << Pozyx.getSystemError() << std::endl;
+    std::cerr << "Calibration failed.\n" << Pozyx.getSystemError() << std::endl;
     return;
   }
   
